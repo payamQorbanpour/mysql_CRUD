@@ -19,8 +19,10 @@ def price_limitaion(price):
         abort(400, message="It is too high!")
 
 class Input(Schema):
-    data = fields.String()
-    price = fields.Integer(validate=price_limitaion)
+    data = fields.Str()
+    title = fields.String()
+    price = fields.Float(validate=price_limitaion)
+    email = fields.Email()
 
 class Stuff(Resource):
     # READ
