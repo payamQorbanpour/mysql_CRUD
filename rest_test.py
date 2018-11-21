@@ -18,14 +18,16 @@ def price_limitaion(price):
     if price > 1000:
         abort(400, message="It is too high!")
 
+
 class Input(Schema):
     data = fields.Str()
     title = fields.String()
     price = fields.Float(validate=price_limitaion)
     email = fields.Email()
 
+
 class Stuff(Resource):
-    # READ
+    # READ individually
     def get(self, stuff_id):
         abort_if_stuff_doesnt_exist(stuff_id)
         return all_stuff[stuff_id]
@@ -52,6 +54,7 @@ class Stuff(Resource):
         del all_stuff[stuff_id]
         return '', 204
 
+# READ totally
 class AllStuff(Resource):
     def get(self):
         return all_stuff
