@@ -1,11 +1,13 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, abort, reqparse
 from marshmallow import fields, Schema, ValidationError
+from pymongo import MongoClient
+
 
 app = Flask(__name__)
 api = Api(app)
 
-all_stuff = {}
+all_stuff = MongoClient().crud_db.stuff
 
 def abort_if_stuff_doesnt_exist(stuff_id):
     if stuff_id not in all_stuff:
@@ -37,7 +39,7 @@ class Stuff(Resource):
         stuff = request.get_json()
         schema = Input()
         result = schema.load(stuff)
-        all_stuff[stuff_id] = result
+        insert_res = all_stuff.insert_one(stuff)
         return result, 201
 
     # UPDATE
@@ -45,19 +47,24 @@ class Stuff(Resource):
         stuff = request.get_json()
         schema = Input()
         result = schema.load(stuff)
-        all_stuff[stuff_id] = result
+        insert_res = all_stuff.insert_one(stuff)
         return result, 201
 
     # DELETE
     def delete(self, stuff_id):
         abort_if_stuff_doesnt_exist(stuff_id)
-        del all_stuff[stuff_id]
+        stuff = request.get_json()
+        all_stuff.delete_one(stuff)
         return '', 204
 
 # READ totally
 class AllStuff(Resource):
     def get(self):
-        return all_stuff
+        bucket = []
+        cursor = all_stuff.find({}, {"_id": 0})
+        for result in cursor:
+            bucket.append(result)
+        return bucket
 
 api.add_resource(Stuff, '/<string:stuff_id>')
 api.add_resource(AllStuff, '/')
