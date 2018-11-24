@@ -7,10 +7,12 @@ from pymongo import MongoClient
 app = Flask(__name__)
 api = Api(app)
 
+# Defining database and collection named stuff
 all_stuff = MongoClient().crud_db.stuff
 
 def abort_if_stuff_doesnt_exist(stuff_id):
-    if stuff_id not in all_stuff:
+    this_stuff = all_stuff.find_one({"data": stuff_id})
+    if not this_stuff:
         abort(404, message="doesn't exist.")
 
 
@@ -31,8 +33,9 @@ class Input(Schema):
 class Stuff(Resource):
     # READ individually
     def get(self, stuff_id):
+        this_stuff = all_stuff.find_one({"data": stuff_id}, {"_id": 0})
         abort_if_stuff_doesnt_exist(stuff_id)
-        return all_stuff[stuff_id]
+        return this_stuff
 
     # CREATE
     def post(self, stuff_id):
@@ -47,15 +50,15 @@ class Stuff(Resource):
         stuff = request.get_json()
         schema = Input()
         result = schema.load(stuff)
-        insert_res = all_stuff.insert_one(stuff)
+        all_stuff.update_one({"data": stuff_id}, {"$set": stuff})
         return result, 201
 
     # DELETE
     def delete(self, stuff_id):
-        abort_if_stuff_doesnt_exist(stuff_id)
+        # abort_if_stuff_doesnt_exist(stuff_id)
         stuff = request.get_json()
-        all_stuff.delete_one(stuff)
-        return '', 204
+        all_stuff.delete_one({"data": stuff_id})
+        return 'Data deleted!', 204
 
 # READ totally
 class AllStuff(Resource):
