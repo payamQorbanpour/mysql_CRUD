@@ -1,14 +1,15 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api, abort
 from marshmallow import fields, Schema, ValidationError
 from sqlalchemy import create_engine, MetaData, select, Table
+import json
 
 
 # Defining database
 engine = create_engine("mysql+mysqldb://john:1234@localhost/TESTDB")
 conn = engine.connect()
 metadata = MetaData()
-stuff = Table('stuff', metadata, autoload=True, autoload_with=engine)
+stuff = Table("stuff", metadata, autoload=True, autoload_with=engine)
 
 app = Flask(__name__)
 api = Api(app)
@@ -33,21 +34,23 @@ class Input(Schema):
     price = fields.Float(validate=price_limitaion)
     email = fields.Email()
 
-#
-# class Stuff(Resource):
-#     # READ individually
-#     def get(self, stuff_id):
-#         this_stuff = all_stuff.find_one({"data": stuff_id}, {"_id": 0})
-#         does_exist(stuff_id)
-#         return this_stuff
-#
-#     # CREATE
-#     def post(self, stuff_id):
-#         stuff = request.get_json()
-#         schema = Input()
-#         result = schema.load(stuff)
-#         all_stuff.insert_one(stuff)
-#         return result, 201
+
+class Stuff(Resource):
+    # READ individually
+    def get(self, stuff_id):
+        table = select([stuff]).where(stuff.c.title == stuff_id)
+        result = conn.execute(table).fetchall()
+        return dict(result)
+
+    # CREATE
+    # def post(self, stuff_id):
+    #     stuff = request.get_json()
+    #     schema = Input()
+    #     result = schema.load(stuff)
+    #     # all_stuff.insert_one(stuff)
+    #     ins = stuff.insert().values(data="Input.data", title="Input.title")
+    #     engine.execute(ins)
+    #     return ins, 201
 #
 #     # UPDATE
 #     def put(self, stuff_id):
@@ -67,13 +70,16 @@ class Input(Schema):
 # READ totally
 class AllStuff(Resource):
     def get(self):
+        stuff_bucket = []
         table = select([stuff])
         result = conn.execute(table).fetchall()
-        stringish = str(result)
-        return stringish
+        for r in result:
+            stuff_bucket.append(dict(r))
+        # print (type(r))
+        return stuff_bucket
 
 
-# api.add_resource(Stuff, '/<string:stuff_id>')
+api.add_resource(Stuff, '/<string:stuff_id>')
 api.add_resource(AllStuff, '/')
 
 if __name__ == '__main__':
