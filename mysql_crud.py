@@ -43,14 +43,13 @@ class Stuff(Resource):
         return dict(result)
 
     # CREATE
-    # def post(self, stuff_id):
-    #     stuff = request.get_json()
-    #     schema = Input()
-    #     result = schema.load(stuff)
-    #     # all_stuff.insert_one(stuff)
-    #     ins = stuff.insert().values(data="Input.data", title="Input.title")
-    #     engine.execute(ins)
-    #     return ins, 201
+    def post(self, stuff_id):
+        schema = Input()
+        things = request.get_json()
+        ins = stuff.insert().values(things)
+        result = engine.execute(ins)
+        jsonalize = schema.load(result)
+        return things, 201
 #
 #     # UPDATE
 #     def put(self, stuff_id):
@@ -75,7 +74,6 @@ class AllStuff(Resource):
         result = conn.execute(table).fetchall()
         for r in result:
             stuff_bucket.append(dict(r))
-        # print (type(r))
         return stuff_bucket
 
 
