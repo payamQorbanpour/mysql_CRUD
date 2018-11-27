@@ -40,16 +40,16 @@ class Stuff(Resource):
 
     # CREATE
     def post(self, stuff_id):
-        stuff = request.get_json()
         schema = Input()
+        stuff = request.get_json()
         result = schema.load(stuff)
         all_stuff.insert_one(stuff)
         return result, 201
 
     # UPDATE
     def put(self, stuff_id):
-        stuff = request.get_json()
         schema = Input()
+        stuff = request.get_json()
         result = schema.load(stuff)
         all_stuff.update_one({"data": stuff_id}, {"$set": stuff})
         return result, 201
