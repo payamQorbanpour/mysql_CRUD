@@ -2,8 +2,6 @@ from flask import Flask, request
 from flask_restful import Resource, Api, abort
 from marshmallow import fields, Schema, ValidationError
 from sqlalchemy import create_engine, MetaData, select, Table
-import json
-
 
 # Defining database
 engine = create_engine("mysql+mysqldb://john:1234@localhost/TESTDB")
@@ -38,9 +36,14 @@ class Input(Schema):
 class Stuff(Resource):
     # READ individually
     def get(self, stuff_id):
+        stuff_bucket = []
+        ins = Input()
         table = select([stuff]).where(stuff.c.title == stuff_id)
         result = conn.execute(table).fetchall()
-        return dict(result)
+        for r in result:
+            serialize = ins.dump(r)
+            stuff_bucket.append(serialize)
+        return stuff_bucket
 
     # CREATE
     def post(self, stuff_id):
