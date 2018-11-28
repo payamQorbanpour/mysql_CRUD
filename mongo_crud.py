@@ -43,7 +43,8 @@ class Stuff(Resource):
         schema = Input()
         stuff = request.get_json()
         result = schema.load(stuff)
-        all_stuff.insert_one(stuff)
+        if result == True:
+            all_stuff.insert_one(stuff)
         return result, 201
 
     # UPDATE
