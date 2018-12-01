@@ -1,4 +1,4 @@
-# mysql_CRUD
+# mysql_mongo_CRUD
 A CRUD aplicatoin using mysql and mongo as database(separately)
 
 In order to run these you should initialize your database as bellow:
