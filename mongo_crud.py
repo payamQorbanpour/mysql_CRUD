@@ -52,6 +52,7 @@ class Stuff(Resource):
 
     # UPDATE
     def put(self, stuff_id):
+        does_exist(stuff_id)
         schema = Input()
         stuff = request.get_json()
         result = schema.load(stuff)

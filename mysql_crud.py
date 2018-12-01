@@ -13,10 +13,10 @@ app = Flask(__name__)
 api = Api(app)
 
 
-# def does_exist(stuff_id):
-#     this_stuff = all_stuff.find_one({"data": stuff_id})
-#     if not this_stuff:
-#         abort(404, message="doesn't exist.")
+def does_exist(stuff_id):
+    this_stuff = all_stuff.find_one({"data": stuff_id})
+    if not this_stuff:
+        abort(404, message="doesn't exist.")
 
 
 def price_limitaion(price):
@@ -36,6 +36,7 @@ class Input(Schema):
 class Stuff(Resource):
     # READ individually
     def get(self, stuff_id):
+        does_exist(stuff_id)
         stuff_bucket = []
         ins = Input()
         table = select([stuff]).where(stuff.c.title == stuff_id)
@@ -49,27 +50,31 @@ class Stuff(Resource):
     def post(self, stuff_id):
         schema = Input()
         things = request.get_json()
-        deserialize = schema.load(things)
-        if not deserialize.errors:
-            ins = stuff.insert().values(deserialize.data)
+        result = schema.load(things)
+        if not result.errors:
+            ins = stuff.insert().values(result.data)
             engine.execute(ins)
-            return deserialize.data, 201
+            return result.data, 201
         else:
-            return deserialize.errors, 201
+            return result.errors, 500
 
-#     # UPDATE
-#     def put(self, stuff_id):
-#         stuff = request.get_json()
-#         schema = Input()
-#         result = schema.load(stuff)
-#         all_stuff.update_one({"body": stuff_id}, {"$set": stuff})
-#         return result, 201
-#
-#     # DELETE
-#     def delete(self, stuff_id):
-#         does_exist(stuff_id)
-#         all_stuff.delete_one({"body": stuff_id})
-#         return 'Data deleted!', 204
+    # UPDATE
+    def put(self, stuff_id):
+        does_exist(stuff_id)
+        schema = Input()
+        things = request.get_json()
+        result = schema.load(things)
+        if not result.errors:
+            all_stuff.update_one({"title": stuff_id}, {"$set": stuff})
+            return result.data, 201
+        else:
+            return result.errors, 500
+
+    # DELETE
+    def delete(self, stuff_id):
+        does_exist(stuff_id)
+        all_stuff.delete_one({"title": stuff_id})
+        return 'Data deleted!', 204
 
 
 # READ totally
