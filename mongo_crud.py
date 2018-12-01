@@ -55,8 +55,11 @@ class Stuff(Resource):
         schema = Input()
         stuff = request.get_json()
         result = schema.load(stuff)
-        table_stuff.update_one({"title": stuff_id}, {"$set": stuff})
-        return result, 201
+        if not result.errors:
+            table_stuff.update_one({"title": stuff_id}, {"$set": stuff})
+            return result, 201
+        else:
+            return result.errors, 500
 
     # DELETE
     def delete(self, stuff_id):
