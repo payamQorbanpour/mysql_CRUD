@@ -11,7 +11,7 @@ for mongodb
 - in the database create a collection named "stuff"
 
 
-for mysqldb
+for mysql
 ---------
 
 - install mysql on your machine
