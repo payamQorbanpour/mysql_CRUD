@@ -50,10 +50,13 @@ class Stuff(Resource):
         schema = Input()
         things = request.get_json()
         deserialize = schema.load(things)
-        ins = stuff.insert().values(deserialize)
-        engine.execute(ins)
-        return things, 201
-#
+        if not deserialize.errors:
+            ins = stuff.insert().values(deserialize.data)
+            engine.execute(ins)
+            return deserialize.data, 201
+        else:
+            return deserialize.errors, 201
+
 #     # UPDATE
 #     def put(self, stuff_id):
 #         stuff = request.get_json()
