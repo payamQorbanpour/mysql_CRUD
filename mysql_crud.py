@@ -56,7 +56,7 @@ class Stuff(Resource):
             engine.execute(ins)
             return result.data, 201
         else:
-            return result.errors, 500
+            return result.errors, 400
 
     # UPDATE
     def put(self, stuff_id):
@@ -68,7 +68,7 @@ class Stuff(Resource):
             all_stuff.update_one({"title": stuff_id}, {"$set": stuff})
             return result.data, 201
         else:
-            return result.errors, 500
+            return result.errors, 400
 
     # DELETE
     def delete(self, stuff_id):

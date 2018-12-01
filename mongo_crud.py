@@ -48,7 +48,7 @@ class Stuff(Resource):
             table_stuff.insert_one(result.data)
             return str(result.data), 201
         else:
-            return result.errors, 500
+            return result.errors, 400
 
     # UPDATE
     def put(self, stuff_id):
@@ -60,7 +60,7 @@ class Stuff(Resource):
             table_stuff.update_one({"title": stuff_id}, {"$set": stuff})
             return result, 201
         else:
-            return result.errors, 500
+            return result.errors, 400
 
     # DELETE
     def delete(self, stuff_id):
