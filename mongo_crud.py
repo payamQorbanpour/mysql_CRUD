@@ -8,11 +8,11 @@ app = Flask(__name__)
 api = Api(app)
 
 # Defining database and collection named stuff
-all_stuff = MongoClient().crud_db.stuff
+table_stuff = MongoClient().crud_db.stuff
 
 
 def does_exist(stuff_id):
-    this_stuff = all_stuff.find_one({"data": stuff_id})
+    this_stuff = table_stuff.find_one({"title": stuff_id})
     if not this_stuff:
         abort(404, message="doesn't exist.")
 
@@ -25,7 +25,7 @@ def price_limitaion(price):
 
 
 class Input(Schema):
-    data = fields.Str()
+    body = fields.Str()
     title = fields.String()
     price = fields.Float(validate=price_limitaion)
     email = fields.Email()
@@ -34,8 +34,8 @@ class Input(Schema):
 class Stuff(Resource):
     # READ individually
     def get(self, stuff_id):
-        this_stuff = all_stuff.find_one({"data": stuff_id}, {"_id": 0})
         does_exist(stuff_id)
+        this_stuff = table_stuff.find_one({"title": stuff_id}, {"_id": 0})
         return this_stuff
 
     # CREATE
@@ -43,22 +43,23 @@ class Stuff(Resource):
         schema = Input()
         stuff = request.get_json()
         result = schema.load(stuff)
-        if result == True:
-            all_stuff.insert_one(stuff)
-        return result, 201
+        # print("******", dir(result))
+        # print (result, type(result))
+        table_stuff.insert_one(result.data)
+        return result.data, 201
 
     # UPDATE
     def put(self, stuff_id):
         schema = Input()
         stuff = request.get_json()
         result = schema.load(stuff)
-        all_stuff.update_one({"data": stuff_id}, {"$set": stuff})
+        table_stuff.update_one({"title": stuff_id}, {"$set": stuff})
         return result, 201
 
     # DELETE
     def delete(self, stuff_id):
         does_exist(stuff_id)
-        all_stuff.delete_one({"data": stuff_id})
+        table_stuff.delete_one({"title": stuff_id})
         return 'Data deleted!', 204
 
 
@@ -66,7 +67,7 @@ class Stuff(Resource):
 class AllStuff(Resource):
     def get(self):
         stuff_bucket = []
-        cursor = all_stuff.find({}, {"_id": 0})
+        cursor = table_stuff.find({}, {"_id": 0})
         for result in cursor:
             stuff_bucket.append(result)
         return stuff_bucket

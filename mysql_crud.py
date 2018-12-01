@@ -27,9 +27,9 @@ def price_limitaion(price):
 
 
 class Input(Schema):
-    data = fields.Str()
+    body = fields.Str()
     title = fields.String()
-    price = fields.Float(validate=price_limitaion)
+    price = fields.Integer(validate=price_limitaion)
     email = fields.Email()
 
 
@@ -49,9 +49,9 @@ class Stuff(Resource):
     def post(self, stuff_id):
         schema = Input()
         things = request.get_json()
-        ins = stuff.insert().values(things)
-        result = engine.execute(ins)
-        jsonalize = schema.load(result)
+        deserialize = schema.load(things)
+        ins = stuff.insert().values(deserialize)
+        engine.execute(ins)
         return things, 201
 #
 #     # UPDATE
@@ -59,13 +59,13 @@ class Stuff(Resource):
 #         stuff = request.get_json()
 #         schema = Input()
 #         result = schema.load(stuff)
-#         all_stuff.update_one({"data": stuff_id}, {"$set": stuff})
+#         all_stuff.update_one({"body": stuff_id}, {"$set": stuff})
 #         return result, 201
 #
 #     # DELETE
 #     def delete(self, stuff_id):
 #         does_exist(stuff_id)
-#         all_stuff.delete_one({"data": stuff_id})
+#         all_stuff.delete_one({"body": stuff_id})
 #         return 'Data deleted!', 204
 
 
