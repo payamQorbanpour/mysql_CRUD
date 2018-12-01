@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api, abort
 from marshmallow import fields, Schema, ValidationError
 from pymongo import MongoClient
-
+from bson import ObjectId
 
 app = Flask(__name__)
 api = Api(app)
@@ -43,10 +43,12 @@ class Stuff(Resource):
         schema = Input()
         stuff = request.get_json()
         result = schema.load(stuff)
-        # print("******", dir(result))
-        # print (result, type(result))
-        table_stuff.insert_one(result.data)
-        return result.data, 201
+        print (result)
+        if not result.errors:
+            table_stuff.insert_one(result.data)
+            return str(result.data), 201
+        else:
+            return result.errors, 500
 
     # UPDATE
     def put(self, stuff_id):
