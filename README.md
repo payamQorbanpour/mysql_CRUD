@@ -1,18 +1,8 @@
-# mysql_mongo_CRUD
-A CRUD aplicatoin using mysql and mongo as database(separately)
+# mysql_CRUD
+A CRUD aplicatoin using mysql as database
 
+---------
 In order to run these you should initialize your database as bellow:
-
-for mongodb
----------
-
-- install mongodb on your machine
-- initialize a database named "crud_db"
-- in the database create a collection named "stuff"
-
-
-for mysql
----------
 
 - install mysql on your machine
 - initialize a database named "TESTDB"
