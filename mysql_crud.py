@@ -5,6 +5,8 @@ from sqlalchemy import create_engine, MetaData, select, Table
 
 # Defining database
 engine = create_engine("mysql+mysqldb://john:1234@localhost/TESTDB")
+engine.execute("CREATE DATABASE TESTDB")
+engine.execute("USE TESTDB")
 conn = engine.connect()
 metadata = MetaData()
 stuff = Table("stuff", metadata, autoload=True, autoload_with=engine)
