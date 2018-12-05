@@ -8,16 +8,16 @@ from models import *
 engine = create_engine("mysql+mysqldb://john:1234@localhost/TESTDB")
 conn = engine.connect()
 metadata = MetaData()
-stuff = Table("stuff", metadata, autoload=True, autoload_with=engine)
+database_table = Table("stuff", metadata, autoload=True, autoload_with=engine)
 
 app = Flask(__name__)
 api = Api(app)
 
 
-def does_exist(stuff_id):
-    title = select([stuff]).where(stuff.c.title == stuff_id)
-    this_stuff = conn.execute(title).fetchone()
-    if not this_stuff:
+def does_exist(data_id):
+    title = select([database_table]).where(database_table.c.title == data_id)
+    table = conn.execute(title).fetchone()
+    if not table:
         abort(404, message="doesn't exist.")
 
 
@@ -28,58 +28,58 @@ def price_limitaion(price):
         abort(400, message="The price is too high!")
 
 
-class Stuff(Resource):
+class CRUD(Resource):
     # READ individually
-    def get(self, stuff_id):
-        does_exist(stuff_id)
-        table = select([stuff]).where(stuff.c.title == stuff_id)
+    def get(self, data_id):
+        does_exist(data_id)
+        table = select([database_table]).where(database_table.c.title == data_id)
         result = conn.execute(table).fetchall()
         return [Input().dump(r) for r in result]
 
 
     # CREATE
-    def post(self, stuff_id):
+    def post(self, data_id):
         schema = Input()
         things = request.get_json()
         result = schema.load(things)
         if not result.errors:
-            ins = stuff.insert().values(result.data)
+            ins = database_table.insert().values(result.data)
             conn.execute(ins)
             return result.data, 201
         else:
             return result.errors, 400
 
     # UPDATE
-    def put(self, stuff_id):
-        does_exist(stuff_id)
+    def put(self, data_id):
+        does_exist(data_id)
         schema = Input()
         things = request.get_json()
         result = schema.load(things)
         if not result.errors:
-            ins = stuff.update().where(stuff.c.title == stuff_id).values(result.data)
+            ins = database_table.update().where(database_table.c.title == data_id).values(result.data)
             conn.execute(ins)
             return result.data, 201
         else:
             return result.errors, 400
 
     # DELETE
-    def delete(self, stuff_id):
-        does_exist(stuff_id)
-        ins = stuff.delete().where(stuff.c.title == stuff_id)
+    def delete(self, data_id):
+        does_exist(data_id)
+        ins = database_table.delete().where(database_table.c.title == data_id)
         conn.execute(ins)
         return 'Data deleted!', 204
 
 
 # READ totally
-class AllStuff(Resource):
+class AllDataRetrieve(Resource):
     def get(self):
-        table = select([stuff])
+        table = select([database_table])
         result = conn.execute(table).fetchall()
         return [dict(r) for r in result]
 
 
-api.add_resource(Stuff, '/<string:stuff_id>')
-api.add_resource(AllStuff, '/')
+api.add_resource(CRUD, '/<string:data_id>')
+api.add_resource(AllDataRetrieve, '/')
 
 if __name__ == '__main__':
     app.run(debug=True)
