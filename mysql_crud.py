@@ -5,8 +5,6 @@ from sqlalchemy import create_engine, MetaData, select, Table
 
 # Defining database
 engine = create_engine("mysql+mysqldb://john:1234@localhost/TESTDB")
-engine.execute("CREATE DATABASE IF NOT EXISTS TESTDB")
-engine.execute("USE TESTDB")
 conn = engine.connect()
 metadata = MetaData()
 stuff = Table("stuff", metadata, autoload=True, autoload_with=engine)
@@ -16,7 +14,8 @@ api = Api(app)
 
 
 def does_exist(stuff_id):
-    this_stuff = all_stuff.find_one({"data": stuff_id})
+    title = select([stuff]).where(stuff.c.title == stuff_id)
+    this_stuff = conn.execute(title).fetchone()
     if not this_stuff:
         abort(404, message="doesn't exist.")
 
@@ -67,7 +66,7 @@ class Stuff(Resource):
         things = request.get_json()
         result = schema.load(things)
         if not result.errors:
-            all_stuff.update_one({"title": stuff_id}, {"$set": stuff})
+            stuff.update_one({"title": stuff_id}, {"$set": stuff})
             return result.data, 201
         else:
             return result.errors, 400
