@@ -82,12 +82,9 @@ class Stuff(Resource):
 # READ totally
 class AllStuff(Resource):
     def get(self):
-        stuff_bucket = []
         table = select([stuff])
         result = conn.execute(table).fetchall()
-        for r in result:
-            stuff_bucket.append(dict(r))
-        return stuff_bucket
+        return [dict(r) for r in result]
 
 
 api.add_resource(Stuff, '/<string:stuff_id>')
