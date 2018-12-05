@@ -38,14 +38,10 @@ class Stuff(Resource):
     # READ individually
     def get(self, stuff_id):
         does_exist(stuff_id)
-        stuff_bucket = []
-        ins = Input()
         table = select([stuff]).where(stuff.c.title == stuff_id)
         result = conn.execute(table).fetchall()
-        for r in result:
-            serialize = ins.dump(r)
-            stuff_bucket.append(serialize)
-        return stuff_bucket
+        return [Input().dump(r) for r in result]
+
 
     # CREATE
     def post(self, stuff_id):
