@@ -1,8 +1,8 @@
-from marshmallow import fields, Schema, ValidationError
+from marshmallow import fields, Schema
 from app import price_limitaion
 
 
-class Input(Schema):
+class Data(Schema):
     body = fields.Str()
     title = fields.String()
     price = fields.Integer(validate=price_limitaion)

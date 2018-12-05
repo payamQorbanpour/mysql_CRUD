@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, abort
-from marshmallow import fields, Schema, ValidationError
+from marshmallow import ValidationError
 from sqlalchemy import create_engine, MetaData, select, update, Table
 from models import *
 
@@ -34,14 +34,13 @@ class CRUD(Resource):
         does_exist(data_id)
         table = select([database_table]).where(database_table.c.title == data_id)
         result = conn.execute(table).fetchall()
-        return [Input().dump(r) for r in result]
+        return [Data().dump(r) for r in result]
 
 
     # CREATE
     def post(self, data_id):
-        schema = Input()
         things = request.get_json()
-        result = schema.load(things)
+        result = Data().load(things)
         if not result.errors:
             ins = database_table.insert().values(result.data)
             conn.execute(ins)
@@ -52,9 +51,8 @@ class CRUD(Resource):
     # UPDATE
     def put(self, data_id):
         does_exist(data_id)
-        schema = Input()
         things = request.get_json()
-        result = schema.load(things)
+        result = Data().load(things)
         if not result.errors:
             ins = database_table.update().where(database_table.c.title == data_id).values(result.data)
             conn.execute(ins)
