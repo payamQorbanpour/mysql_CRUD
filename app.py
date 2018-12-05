@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api, abort
 from marshmallow import fields, Schema, ValidationError
 from sqlalchemy import create_engine, MetaData, select, update, Table
+from models import *
 
 # Defining database
 engine = create_engine("mysql+mysqldb://john:1234@localhost/TESTDB")
@@ -25,13 +26,6 @@ def price_limitaion(price):
         raise ValidationError('Price couldn\'t be negative!')
     if price > 1000:
         abort(400, message="The price is too high!")
-
-
-class Input(Schema):
-    body = fields.Str()
-    title = fields.String()
-    price = fields.Integer(validate=price_limitaion)
-    email = fields.Email()
 
 
 class Stuff(Resource):
