@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, abort
 from marshmallow import fields, Schema, ValidationError
-from sqlalchemy import create_engine, MetaData, select, Table
+from sqlalchemy import create_engine, MetaData, select, update, Table
 
 # Defining database
 engine = create_engine("mysql+mysqldb://john:1234@localhost/TESTDB")
@@ -54,7 +54,7 @@ class Stuff(Resource):
         result = schema.load(things)
         if not result.errors:
             ins = stuff.insert().values(result.data)
-            engine.execute(ins)
+            conn.execute(ins)
             return result.data, 201
         else:
             return result.errors, 400
@@ -66,7 +66,8 @@ class Stuff(Resource):
         things = request.get_json()
         result = schema.load(things)
         if not result.errors:
-            stuff.update_one({"title": stuff_id}, {"$set": stuff})
+            ins = stuff.update().where(stuff.c.title == stuff_id).values(result.data)
+            conn.execute(ins)
             return result.data, 201
         else:
             return result.errors, 400
@@ -74,7 +75,8 @@ class Stuff(Resource):
     # DELETE
     def delete(self, stuff_id):
         does_exist(stuff_id)
-        all_stuff.delete_one({"title": stuff_id})
+        ins = stuff.delete().where(stuff.c.title == stuff_id)
+        conn.execute(ins)
         return 'Data deleted!', 204
 
 
